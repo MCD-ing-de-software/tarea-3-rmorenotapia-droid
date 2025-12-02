@@ -82,6 +82,20 @@ class TestDataCleaner(unittest.TestCase):
         - Verificar que el DataFrame resultante no tiene valores faltantes en esas columnas (usar self.assertEqual para comparar .isna().sum() con 0 - comparación simple de enteros, unittest es suficiente)
         - Verificar que el DataFrame resultante tiene menos filas que el original (usar self.assertLess con len() - comparación simple de enteros, unittest es suficiente)
         """
+        df = make_sample_df()
+        cleaner = DataCleaner()
+
+        original_len = len(df)
+
+        # Aplicar limpieza sobre columnas "name" y "age"
+        result = cleaner.drop_invalid_rows(df, ["name", "age"])
+
+        # Verificar que no hay valores faltantes 
+        self.assertEqual(result["name"].isna().sum(), 0)
+        self.assertEqual(result["age"].isna().sum(), 0)
+
+        # Verificar que se redujo la cant de filas
+        self.assertLess(len(result), original_len)    
 
     def test_drop_invalid_rows_raises_keyerror_for_unknown_column(self):
         """Test que verifica que el método drop_invalid_rows lanza un KeyError cuando

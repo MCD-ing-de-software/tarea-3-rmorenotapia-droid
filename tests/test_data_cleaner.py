@@ -112,6 +112,7 @@ class TestDataCleaner(unittest.TestCase):
         # Columna inexistente
         with self.assertRaises(KeyError):
             cleaner.drop_invalid_rows(df, ["does_not_exist"])
+
     def test_trim_strings_strips_whitespace_without_changing_other_columns(self):
         """Test que verifica que el método trim_strings elimina correctamente los espacios
         en blanco al inicio y final de los valores en las columnas especificadas, sin modificar
@@ -127,22 +128,25 @@ class TestDataCleaner(unittest.TestCase):
         df = make_sample_df()
         cleaner = DataCleaner()
 
-        # Guarda valor original para verificar que no cambió
-        original_name_value = df.loc[0, "name"]      
-        original_city_series = df["city"].copy()     
+        #  columna 'name' sea de tipo string 
+        df["name"] = df["name"].astype("string")
 
-        # Ejecutar la limpieza solo sobre "name"
+        # guardar valor original para verificar que el original no se modifica
+        original_name_value = df.loc[0, "name"]
+        original_city_series = df["city"].copy()
+
+        # limpieza solo sobre "name"
         result = cleaner.trim_strings(df, ["name"])
 
-        # Verificar que el DataFrame origina no fue modificado
+        # El df original mantiene el mismo valor
         self.assertEqual(df.loc[0, "name"], original_name_value)
 
-        # Verificar que en el resultado se eliminan los espacios
+        # resultado se eliminan los espacios
         self.assertEqual(result.loc[0, "name"], "Alice")
 
-        # Verificar que columnas no mencionadas no se modificaron
+        # columna 'city' no se modificó
         pdt.assert_series_equal(result["city"], original_city_series)
-
+        
     def test_trim_strings_raises_typeerror_for_non_string_column(self):
         """Test que verifica que el método trim_strings lanza un TypeError cuando
         se llama con una columna que no es de tipo string.

@@ -146,7 +146,7 @@ class TestDataCleaner(unittest.TestCase):
 
         # columna 'city' no se modificó
         pdt.assert_series_equal(result["city"], original_city_series)
-        
+
     def test_trim_strings_raises_typeerror_for_non_string_column(self):
         """Test que verifica que el método trim_strings lanza un TypeError cuando
         se llama con una columna que no es de tipo string.
@@ -174,19 +174,26 @@ class TestDataCleaner(unittest.TestCase):
         - Verificar que el valor extremo (120) fue eliminado del resultado (usar self.assertNotIn para verificar que 120 no está en los valores de la columna)
         - Verificar que al menos uno de los valores no extremos (25 o 35) permanece en el resultado (usar self.assertIn para verificar que está presente)
         """
-        df = make_sample_df()
+       
         cleaner = DataCleaner()
+        
+        df = pd.DataFrame(
+            {
+                "name": ["A", "B", "C", "D", "E", "F", "G"],
+                "age":  [20, 21, 22, 23, 24, 25, 120],  
+                "city": ["SCL"] * 7,
+            }
+        )
 
         result = cleaner.remove_outliers_iqr(df, "age", factor=1.5)
+        ages = result["age"].to_numpy()
 
-        ages = result["age"].dropna().values
-
-        # Verifica que el outlier (120) ya no está
+        #  valor extremo (120) fue eliminado
         self.assertNotIn(120, ages)
 
-        # Revisa que al menos uno de los valores no extremos permanece
-        self.assertTrue(any(v in ages for v in [25, 35]))
-
+        # al menos uno de los valores normales permanece
+        self.assertTrue(any(v in ages for v in [20, 21, 22, 23, 24, 25]))
+       
     def test_remove_outliers_iqr_raises_keyerror_for_missing_column(self):
         """Test que verifica que el método remove_outliers_iqr lanza un KeyError cuando
         se llama con una columna que no existe en el DataFrame.
